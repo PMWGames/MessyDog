@@ -58,7 +58,7 @@ public class CenaGame extends AGScene {
 
         hitbox_tapete_sala = createSprite(R.drawable.pixel, 1, 1);
         hitbox_tapete_sala.setScreenPercent(21, 8);
-        hitbox_tapete_sala.vrPosition.setXY(AGScreenManager.iScreenWidth/4, AGScreenManager.iScreenHeight/1.24f);
+        hitbox_tapete_sala.vrPosition.setXY(AGScreenManager.iScreenWidth/4.0f, AGScreenManager.iScreenHeight/1.24f);
 
         cao = createSprite(R.drawable.catio_sheet, 4, 1);
         cao.setScreenPercent(5, 10);
