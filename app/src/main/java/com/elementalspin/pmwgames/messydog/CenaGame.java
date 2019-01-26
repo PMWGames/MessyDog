@@ -12,6 +12,9 @@ import com.elementalspin.pmwgames.messydog.java2d.Vector2D;
 
 public class CenaGame extends AGScene {
 
+    private static int SALA = 0;
+    private int local_cao = SALA;
+
     private static int PARADO = 0, ANDANDO = 1;
     private int estado_cao = PARADO;
 
@@ -20,7 +23,11 @@ public class CenaGame extends AGScene {
     private float velocidade_cao_fixa = 7.5f, velocidade_cao_x, velocidade_cao_y;
     private AGVector2D origem = null, destino = null, hipo = null;
 
+    private AGSprite sala = null;
+
     private AGSprite cao = null;
+
+    private AGSprite hitbox_sofa_p, hitbox_sofa_g, hitbox_mesa_sala, hitbox_planta_sala;
 
     public CenaGame(AGGameManager pManager) {
         super(pManager);
@@ -28,6 +35,14 @@ public class CenaGame extends AGScene {
 
     @Override
     public void init() {
+
+        sala = createSprite(R.drawable.sala, 1,1);
+        sala.setScreenPercent(100, 100);
+        sala.vrPosition.setXY(AGScreenManager.iScreenWidth/2, AGScreenManager.iScreenHeight/2);
+
+        hitbox_sofa_p = createSprite(R.drawable.pixel, 1, 1);
+        hitbox_sofa_p.setScreenPercent(26, 11);
+        hitbox_sofa_p.vrPosition.setXY(AGScreenManager.iScreenWidth/2, AGScreenManager.iScreenHeight/1.265f);
 
         cao = createSprite(R.drawable.catio_sheet, 4, 1);
         cao.setScreenPercent(5, 10);
@@ -52,6 +67,9 @@ public class CenaGame extends AGScene {
 
     @Override
     public void loop() {
+
+        //gerencia os locais que o cao está e suas interações
+        locais();
 
         //Se a tela for clicada!
         if(AGInputManager.vrTouchEvents.screenClicked()){
@@ -169,6 +187,16 @@ public class CenaGame extends AGScene {
 
         }
 
+
+    }
+
+    private void locais() {
+
+        if (local_cao == SALA){
+            sala.vrPosition.setXY(AGScreenManager.iScreenWidth/2, AGScreenManager.iScreenHeight/2);
+
+
+        }
 
     }
 }
