@@ -41,8 +41,12 @@ public class CenaGame extends AGScene {
         sala.vrPosition.setXY(AGScreenManager.iScreenWidth/2, AGScreenManager.iScreenHeight/2);
 
         hitbox_sofa_p = createSprite(R.drawable.pixel, 1, 1);
-        hitbox_sofa_p.setScreenPercent(26, 11);
-        hitbox_sofa_p.vrPosition.setXY(AGScreenManager.iScreenWidth/2, AGScreenManager.iScreenHeight/1.265f);
+        hitbox_sofa_p.setScreenPercent(26, 9);
+        hitbox_sofa_p.vrPosition.setXY(AGScreenManager.iScreenWidth/2, AGScreenManager.iScreenHeight/1.24f);
+
+        hitbox_sofa_g = createSprite(R.drawable.pixel, 1, 1);
+        hitbox_sofa_g.setScreenPercent(9, 30);
+        //hitbox_sofa_g.vrPosition.setXY();
 
         cao = createSprite(R.drawable.catio_sheet, 4, 1);
         cao.setScreenPercent(5, 10);
@@ -195,6 +199,9 @@ public class CenaGame extends AGScene {
         if (local_cao == SALA){
             sala.vrPosition.setXY(AGScreenManager.iScreenWidth/2, AGScreenManager.iScreenHeight/2);
 
+            if(hitbox_sofa_p.collide(cao)){
+                estado_cao = PARADO;
+            }
 
         }
 
