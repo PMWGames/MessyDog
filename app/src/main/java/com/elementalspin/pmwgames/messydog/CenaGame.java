@@ -36,48 +36,20 @@ public class CenaGame extends AGScene {
     @Override
     public void init() {
 
-        sala = createSprite(R.drawable.sala, 1,1);
-        sala.setScreenPercent(100, 100);
-        sala.vrPosition.setXY(AGScreenManager.iScreenWidth/2, AGScreenManager.iScreenHeight/2);
+        cria_cao();
 
-        hitbox_sala_safe1 = createSprite(R.drawable.pixel, 1, 1);
-        hitbox_sala_safe1.setScreenPercent(25,7);
-        hitbox_sala_safe1.vrPosition.setXY(AGScreenManager.iScreenWidth/1.285f, AGScreenManager.iScreenHeight/1.22f);
-        hitbox_sala_safe1.setColor(1,1,1,0);
+        origem = new AGVector2D();
+        destino = new AGVector2D();
+        hipo = new AGVector2D();
 
-        hitbox_sofa_p = createSprite(R.drawable.pixel, 1, 1);
-        hitbox_sofa_p.setScreenPercent(26, 9);
-        hitbox_sofa_p.vrPosition.setXY(AGScreenManager.iScreenWidth/2, AGScreenManager.iScreenHeight/1.24f);
-        hitbox_sofa_p.setColor(1,1,1,0);
+    }
 
-        hitbox_sofa_g = createSprite(R.drawable.pixel, 1, 1);
-        hitbox_sofa_g.setScreenPercent(20, 31);
-        hitbox_sofa_g.vrPosition.setXY(AGScreenManager.iScreenWidth/1.25f, AGScreenManager.iScreenHeight/2.08f);
-        hitbox_sofa_g.setColor(1,1,1,0);
-
-        hitbox_mesa_sala = createSprite(R.drawable.pixel, 1, 1);
-        hitbox_mesa_sala.setScreenPercent(21, 16);
-        hitbox_mesa_sala.vrPosition.setXY(AGScreenManager.iScreenWidth/2.1f, AGScreenManager.iScreenHeight/2.08f);
-        hitbox_mesa_sala.setColor(1,1,1,0);
-
-        hitbox_tapete_sala = createSprite(R.drawable.pixel, 1, 1);
-        hitbox_tapete_sala.setScreenPercent(21, 8);
-        hitbox_tapete_sala.vrPosition.setXY(AGScreenManager.iScreenWidth/4.45f, AGScreenManager.iScreenHeight/1.24f);
-        hitbox_tapete_sala.setColor(1,1,1,0);
-
-        hitbox_coluna_sala = createSprite(R.drawable.pixel, 1, 1);
-        hitbox_coluna_sala.setScreenPercent(17, 16);
-        hitbox_coluna_sala.vrPosition.setXY(AGScreenManager.iScreenWidth/6.5f, AGScreenManager.iScreenHeight/5.1f);
-        hitbox_coluna_sala.setColor(1,1,1,0);
+    private void cria_cao() {
 
         cao = createSprite(R.drawable.catio_sheet, 4, 1);
         cao.setScreenPercent(5, 10);
         cao.vrPosition.setXY(AGScreenManager.iScreenWidth/2, AGScreenManager.iScreenHeight/2);
         cao.addAnimation(4, true, 0, 3);
-
-        origem = new AGVector2D();
-        destino = new AGVector2D();
-        hipo = new AGVector2D();
 
     }
 
@@ -108,9 +80,15 @@ public class CenaGame extends AGScene {
 
             cao.fAngle = (float) an;
 
-            destino_x = AGInputManager.vrTouchEvents.getLastPosition().fX;
-            destino_y = AGInputManager.vrTouchEvents.getLastPosition().fY;
-
+            if(local_cao == SALA) {
+                if(AGInputManager.vrTouchEvents.getLastPosition().fX > AGScreenManager.iScreenWidth / 5.25f){
+                    if(AGInputManager.vrTouchEvents.getLastPosition().fX < AGScreenManager.iScreenWidth / 1.1f){
+                        destino_x = AGInputManager.vrTouchEvents.getLastPosition().fX;
+                    }
+                }
+                //destino_x = AGInputManager.vrTouchEvents.getLastPosition().fX;
+                destino_y = AGInputManager.vrTouchEvents.getLastPosition().fY;
+            }
             estado_cao = ANDANDO;
 
             chegou_destino_x = false;
@@ -219,11 +197,46 @@ public class CenaGame extends AGScene {
     private void locais() {
 
         if (local_cao == SALA){
+
+            sala = createSprite(R.drawable.sala, 1,1);
+            sala.setScreenPercent(100, 100);
             sala.vrPosition.setXY(AGScreenManager.iScreenWidth/2, AGScreenManager.iScreenHeight/2);
+
+            hitbox_sala_safe1 = createSprite(R.drawable.pixel, 1, 1);
+            hitbox_sala_safe1.setScreenPercent(25,7);
+            hitbox_sala_safe1.vrPosition.setXY(AGScreenManager.iScreenWidth/1.285f, AGScreenManager.iScreenHeight/1.22f);
+            hitbox_sala_safe1.setColor(1,1,1,0);
+
+            hitbox_sofa_p = createSprite(R.drawable.pixel, 1, 1);
+            hitbox_sofa_p.setScreenPercent(26, 9);
+            hitbox_sofa_p.vrPosition.setXY(AGScreenManager.iScreenWidth/2, AGScreenManager.iScreenHeight/1.24f);
+            hitbox_sofa_p.setColor(1,1,1,0);
+
+            hitbox_sofa_g = createSprite(R.drawable.pixel, 1, 1);
+            hitbox_sofa_g.setScreenPercent(20, 31);
+            hitbox_sofa_g.vrPosition.setXY(AGScreenManager.iScreenWidth/1.25f, AGScreenManager.iScreenHeight/2.08f);
+            hitbox_sofa_g.setColor(1,1,1,0);
+
+            hitbox_mesa_sala = createSprite(R.drawable.pixel, 1, 1);
+            hitbox_mesa_sala.setScreenPercent(21, 16);
+            hitbox_mesa_sala.vrPosition.setXY(AGScreenManager.iScreenWidth/2.1f, AGScreenManager.iScreenHeight/2.08f);
+            hitbox_mesa_sala.setColor(1,1,1,0);
+
+            hitbox_tapete_sala = createSprite(R.drawable.pixel, 1, 1);
+            hitbox_tapete_sala.setScreenPercent(21, 8);
+            hitbox_tapete_sala.vrPosition.setXY(AGScreenManager.iScreenWidth/4.45f, AGScreenManager.iScreenHeight/1.24f);
+            hitbox_tapete_sala.setColor(1,1,1,0);
+
+            hitbox_coluna_sala = createSprite(R.drawable.pixel, 1, 1);
+            hitbox_coluna_sala.setScreenPercent(17, 16);
+            hitbox_coluna_sala.vrPosition.setXY(AGScreenManager.iScreenWidth/6.5f, AGScreenManager.iScreenHeight/5.1f);
+            hitbox_coluna_sala.setColor(1,1,1,0);
 
             if(hitbox_sofa_p.collide(cao)){
                 estado_cao = PARADO;
             }
+
+            cria_cao();
 
         }
 
