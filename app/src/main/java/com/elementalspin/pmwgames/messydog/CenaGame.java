@@ -27,7 +27,7 @@ public class CenaGame extends AGScene {
 
     private AGSprite cao = null;
 
-    private AGSprite hitbox_sofa_p, hitbox_sofa_g, hitbox_mesa_sala, hitbox_tapete_sala, hitbox_sala_safe1;
+    private AGSprite hitbox_sofa_p, hitbox_sofa_g, hitbox_mesa_sala, hitbox_tapete_sala, hitbox_sala_safe1, hitbox_coluna_sala;
 
     public CenaGame(AGGameManager pManager) {
         super(pManager);
@@ -43,22 +43,32 @@ public class CenaGame extends AGScene {
         hitbox_sala_safe1 = createSprite(R.drawable.pixel, 1, 1);
         hitbox_sala_safe1.setScreenPercent(25,7);
         hitbox_sala_safe1.vrPosition.setXY(AGScreenManager.iScreenWidth/1.285f, AGScreenManager.iScreenHeight/1.22f);
+        hitbox_sala_safe1.setColor(1,1,1,0);
 
         hitbox_sofa_p = createSprite(R.drawable.pixel, 1, 1);
         hitbox_sofa_p.setScreenPercent(26, 9);
         hitbox_sofa_p.vrPosition.setXY(AGScreenManager.iScreenWidth/2, AGScreenManager.iScreenHeight/1.24f);
+        hitbox_sofa_p.setColor(1,1,1,0);
 
         hitbox_sofa_g = createSprite(R.drawable.pixel, 1, 1);
-        hitbox_sofa_g.setScreenPercent(22, 31);
-        hitbox_sofa_g.vrPosition.setXY(AGScreenManager.iScreenWidth/1.3f, AGScreenManager.iScreenHeight/2.08f);
+        hitbox_sofa_g.setScreenPercent(20, 31);
+        hitbox_sofa_g.vrPosition.setXY(AGScreenManager.iScreenWidth/1.25f, AGScreenManager.iScreenHeight/2.08f);
+        hitbox_sofa_g.setColor(1,1,1,0);
 
         hitbox_mesa_sala = createSprite(R.drawable.pixel, 1, 1);
-        hitbox_mesa_sala.setScreenPercent(20, 21);
-        hitbox_mesa_sala.vrPosition.setXY(AGScreenManager.iScreenWidth/2f, AGScreenManager.iScreenHeight/2f);
+        hitbox_mesa_sala.setScreenPercent(21, 16);
+        hitbox_mesa_sala.vrPosition.setXY(AGScreenManager.iScreenWidth/2.1f, AGScreenManager.iScreenHeight/2.08f);
+        hitbox_mesa_sala.setColor(1,1,1,0);
 
         hitbox_tapete_sala = createSprite(R.drawable.pixel, 1, 1);
         hitbox_tapete_sala.setScreenPercent(21, 8);
-        hitbox_tapete_sala.vrPosition.setXY(AGScreenManager.iScreenWidth/4.0f, AGScreenManager.iScreenHeight/1.24f);
+        hitbox_tapete_sala.vrPosition.setXY(AGScreenManager.iScreenWidth/4.45f, AGScreenManager.iScreenHeight/1.24f);
+        hitbox_tapete_sala.setColor(1,1,1,0);
+
+        hitbox_coluna_sala = createSprite(R.drawable.pixel, 1, 1);
+        hitbox_coluna_sala.setScreenPercent(17, 16);
+        hitbox_coluna_sala.vrPosition.setXY(AGScreenManager.iScreenWidth/6.5f, AGScreenManager.iScreenHeight/5.1f);
+        hitbox_coluna_sala.setColor(1,1,1,0);
 
         cao = createSprite(R.drawable.catio_sheet, 4, 1);
         cao.setScreenPercent(5, 10);
