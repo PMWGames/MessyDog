@@ -7,6 +7,7 @@ import com.elementalspin.pmwgames.messydog.AndGraph.AGInputManager;
 import com.elementalspin.pmwgames.messydog.AndGraph.AGScene;
 import com.elementalspin.pmwgames.messydog.AndGraph.AGScreenManager;
 import com.elementalspin.pmwgames.messydog.AndGraph.AGSprite;
+import com.elementalspin.pmwgames.messydog.AndGraph.AGText;
 import com.elementalspin.pmwgames.messydog.AndGraph.AGVector2D;
 import com.elementalspin.pmwgames.messydog.java2d.Vector2D;
 
@@ -20,6 +21,7 @@ public class CenaGame extends AGScene {
 
     private static int TAPETE_SALA = 1, VASO_SALA = 2;
     private int ref_obj_interacao = 0;
+    private boolean planta_sala_quebrou = false;
 
     private float destino_x, destino_y, distancia_x, distancia_y;;
     private boolean chegou_destino_x, chegou_destino_y;
@@ -35,10 +37,13 @@ public class CenaGame extends AGScene {
 
     private AGSprite cao = null;
 
-    private AGSprite hitbox_sofa_p, hitbox_sofa_g, hitbox_mesa_sala, hitbox_tapete_sala, hitbox_sala_safe1, hitbox_coluna_sala;
+    private AGSprite hitbox_sofa_p = null, hitbox_sofa_g = null, hitbox_mesa_sala = null, hitbox_tapete_sala = null,
+            hitbox_sala_safe1 = null, hitbox_coluna_sala = null, planta_sala = null, planta_sala_quebrada = null;
 
     private AGSprite botao_aceitar = null;
     private AGSprite botao_cancelar = null;
+
+    private AGText txt_points = null;
 
 
     public CenaGame(AGGameManager pManager) {
@@ -57,6 +62,11 @@ public class CenaGame extends AGScene {
         origem = new AGVector2D();
         destino = new AGVector2D();
         hipo = new AGVector2D();
+
+        txt_points = new AGText(this, R.drawable.pixel);
+        txt_points.setSize(2);
+        txt_points.setTextPosXY(AGScreenManager.iScreenWidth/1.2f, AGScreenManager.iScreenHeight/1.05f);
+        txt_points.setText("0");
 
     }
 
@@ -90,10 +100,38 @@ public class CenaGame extends AGScene {
 
         movimenta_cao();
 
+        //clique ok cancel
         verifica_botoes_interacao();
 
+        update_points();
 
+    }
 
+    private void update_points() {
+
+        if( Integer.parseInt(txt_points.getText()) != points){
+            txt_points.setText(String.valueOf(points));
+        }
+
+    }
+
+    private void interage() {
+
+        if(ref_obj_interacao != 0){
+
+            if(ref_obj_interacao == TAPETE_SALA){
+
+            } else if(ref_obj_interacao == VASO_SALA && !planta_sala_quebrou){
+
+                planta_sala.setColor(1,1,1,0);
+                planta_sala_quebrada.setColor(1,1,1,1);
+                planta_sala_quebrou = true;
+                ref_obj_interacao = 0;
+                points += 200;
+
+            }
+
+        }
 
     }
 
@@ -104,13 +142,16 @@ public class CenaGame extends AGScene {
 
                 if(ref_obj_interacao == TAPETE_SALA){
 
-                } else if(ref_obj_interacao == VASO_SALA){
+                }
 
+                if(ref_obj_interacao == VASO_SALA){
+                    interage();
                 }
 
                 mostrar_botoes_interacao(0, false);
                 estado_cao = PARADO;
                 return;
+
             }
 
             if(botao_cancelar.collide(AGInputManager.vrTouchEvents.getLastPosition())){
@@ -126,7 +167,6 @@ public class CenaGame extends AGScene {
 
         //Se a tela for clicada!
         if(AGInputManager.vrTouchEvents.screenClicked()){
-
 
 
             if(local_cao == SALA) {
@@ -151,6 +191,7 @@ public class CenaGame extends AGScene {
 
 
             }
+
             estado_cao = ANDANDO;
 
             chegou_destino_x = false;
@@ -197,7 +238,6 @@ public class CenaGame extends AGScene {
     }
 
     private void movimenta_cao() {
-
 
 
         //verifica se o estado do cão é o de andando ou parado
@@ -274,9 +314,13 @@ public class CenaGame extends AGScene {
 
             if(hitbox_tapete_sala.collide(sprite)){
 
-                mostrar_botoes_interacao(0, true);
+                mostrar_botoes_interacao(TAPETE_SALA, true);
 
-            } else {
+            }
+
+            if(hitbox_mesa_sala.collide(sprite) && !planta_sala_quebrou){
+
+                mostrar_botoes_interacao(VASO_SALA, true);
 
             }
 
@@ -297,8 +341,6 @@ public class CenaGame extends AGScene {
                 estado_cao = PARADO;
             }
 
-
-
             if (hitbox_sala_safe1.collide(sprite)) {
                 cao_is_safe = true;
             } else {
@@ -312,6 +354,7 @@ public class CenaGame extends AGScene {
 
         if(mostrar){
             if(botao_aceitar == null){
+
                 botao_aceitar = createSprite(R.drawable.checked, 1, 1);
                 botao_aceitar.vrPosition.setXY(AGScreenManager.iScreenWidth/1.5f, AGScreenManager.iScreenHeight/4);
                 botao_aceitar.setScreenProportional(AGScreenManager.iScreenWidth/10);
@@ -375,6 +418,18 @@ public class CenaGame extends AGScene {
             hitbox_coluna_sala.vrPosition.setXY(AGScreenManager.iScreenWidth/6.5f, AGScreenManager.iScreenHeight/5.1f);
             hitbox_coluna_sala.setColor(1,1,1,0);
 
+            planta_sala = createSprite(R.drawable.vaso_planta, 1, 1);
+            planta_sala.setScreenProportional(AGScreenManager.iScreenWidth / 8);
+            planta_sala.vrPosition.setXY(AGScreenManager.iScreenWidth/2.09f, AGScreenManager.iScreenHeight/2.09f);
+            planta_sala.setColor(1,1,1,1);
+
+            planta_sala_quebrada = createSprite(R.drawable.prantaquebrada,1 ,1);
+            planta_sala_quebrada.setScreenProportional(AGScreenManager.iScreenWidth / 8);
+            planta_sala_quebrada.vrPosition.setXY(AGScreenManager.iScreenWidth/2.09f, AGScreenManager.iScreenHeight/2.09f);
+            planta_sala_quebrada.setColor(1,1,1,0);
+
+            planta_sala_quebrou = false;
+
 
         }
 
@@ -392,6 +447,8 @@ public class CenaGame extends AGScene {
             removeSprite(hitbox_mesa_sala);
             removeSprite(hitbox_tapete_sala);
             removeSprite(hitbox_coluna_sala);
+            removeSprite(planta_sala);
+            removeSprite(planta_sala_quebrada);
 
             sala = null;
             hitbox_sala_safe1 = null;
@@ -400,6 +457,8 @@ public class CenaGame extends AGScene {
             hitbox_mesa_sala = null;
             hitbox_tapete_sala = null;
             hitbox_coluna_sala = null;
+            planta_sala = null;
+            planta_sala_quebrada = null;
 
         }
 
