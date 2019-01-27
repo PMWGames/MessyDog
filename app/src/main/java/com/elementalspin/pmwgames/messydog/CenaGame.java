@@ -21,16 +21,16 @@ import java.util.Random;
 
 public class CenaGame extends AGScene {
 
-    private static int SALA = 0;
+    private static int SALA = 0, QUARTO = 1;
     private int local_cao = SALA;
 
     private static int PARADO = 0, ANDANDO = 1;
     private int estado_cao = PARADO;
 
-    private static int TAPETE_SALA = 1, VASO_SALA = 2;
+    private static int TAPETE_SALA = 1, VASO_SALA = 2, VASO_QUARTO, CAMA_QUARTO;
     private int ref_obj_interacao = 0;
-    private boolean planta_sala_quebrou = false;
-    private boolean tapete_sala_baguncou = false;
+    private boolean planta_sala_quebrou = false, isPlanta_quarto_quebrou = false;
+    private boolean tapete_sala_baguncou = false, cama_quarto_baguncou = false;
 
     private float destino_x, destino_y, distancia_x, distancia_y;;
     private boolean chegou_destino_x, chegou_destino_y;
@@ -43,14 +43,17 @@ public class CenaGame extends AGScene {
 
     private AGVector2D origem = null, destino = null, hipo = null;
 
-    private AGSprite sala = null;
-
     private AGSprite cao = null;
     private AGSprite dono = null;
 
+    private AGSprite sala = null;
     private AGSprite hitbox_sofa_p = null, hitbox_sofa_g = null, hitbox_mesa_sala = null, hitbox_tapete_sala = null,
             hitbox_sala_safe1 = null, hitbox_coluna_sala = null, planta_sala = null, planta_sala_quebrada = null,
-            tapete_sala = null, tapete_sala_baguncado = null;
+            tapete_sala = null, tapete_sala_baguncado = null, hitbox_go_quarto = null;
+
+    private AGSprite quarto = null;
+    private AGSprite hitbox_guarda_r_g = null, hitbox_guarda_r_m = null, hitbox_guarda_r_p = null, cama = null, cama_banguncada = null,
+            planta_quarto = null, planta_quarto_quebrada = null, hitbox_quarto_safe1 = null, hitbox_go_sala = null;
 
     private AGSprite botao_aceitar = null;
     private AGSprite botao_cancelar = null;
@@ -59,8 +62,8 @@ public class CenaGame extends AGScene {
 
     private int ronda = 0;
     private int game_over_time = 0;
-    private int chance_dono_aparece_sala;
-
+    private int chance_dono_aparece_sala, chance_dono_aparece_quarto;
+    private boolean planta_quarto_quebrou;
 
 
     public CenaGame(AGGameManager pManager) {
@@ -134,9 +137,20 @@ public class CenaGame extends AGScene {
                         dono = createSprite(R.drawable.dono, 1, 1);
                         dono.setScreenPercent(10, 10);
                         dono.vrPosition.setXY(100, 100);
+                        
+                        game_over_call();
 
-                        //int cachorro = AGSoundManager.vrSoundEffects.loadSoundEffect("cachorro.mp3");
-                        //AGSoundManager.vrSoundEffects.play(cachorro);
+                    }
+
+                }
+            }else if(local_cao == QUARTO){
+                if (rand < chance_dono_aparece_quarto){
+
+                    if( (cama_quarto_baguncou || planta_quarto_quebrou) && (!cao_is_safe)){
+
+                        dono = createSprite(R.drawable.dono, 1, 1);
+                        dono.setScreenPercent(10, 10);
+                        dono.vrPosition.setXY(100, 100);
 
                         game_over_call();
 
@@ -178,18 +192,9 @@ public class CenaGame extends AGScene {
                 e.printStackTrace();
             }
 
-            cria_locais(local_cao);
-            removeSprite(cao);
-            cao = null;
-            ref_obj_interacao = 0;
-            removeSprite(dono);
-            dono = null;
-            points = 0;
+            reseta();
 
             vrGameManager.setCurrentScene(Cenas.CENA_GAMEOVER);
-
-
-
 
     }
 
@@ -226,6 +231,24 @@ public class CenaGame extends AGScene {
                 int vidro_quebra = AGSoundManager.vrSoundEffects.loadSoundEffect("vidro.mp3");
                 AGSoundManager.vrSoundEffects.play(vidro_quebra);
 
+            } else if(ref_obj_interacao == VASO_QUARTO && !planta_quarto_quebrou){
+
+                planta_quarto.setColor(1,1,1,0);
+                planta_quarto_quebrada.setColor(1,1,1,1);
+                planta_quarto_quebrou = true;
+                ref_obj_interacao = 0;
+                points += 200;
+                chance_dono_aparece_quarto += 10;
+                int vidro_quebra = AGSoundManager.vrSoundEffects.loadSoundEffect("vidro.mp3");
+                AGSoundManager.vrSoundEffects.play(vidro_quebra);
+
+            } else if (ref_obj_interacao == CAMA_QUARTO && !cama_quarto_baguncou){
+                cama.setColor(1,1,1,0);
+                cama_banguncada.setColor(1,1,1,1);
+                cama_quarto_baguncou = true;
+                ref_obj_interacao = 0;
+                points += 40;
+                chance_dono_aparece_quarto += 10;
             }
 
         }
@@ -242,6 +265,15 @@ public class CenaGame extends AGScene {
                 }
 
                 if(ref_obj_interacao == VASO_SALA){
+                    interage();
+                }
+
+                if(ref_obj_interacao == VASO_QUARTO)
+                {
+                    interage();
+                }
+
+                if(ref_obj_interacao == CAMA_QUARTO){
                     interage();
                 }
 
@@ -288,7 +320,24 @@ public class CenaGame extends AGScene {
 
                     }
 
+                } else if(local_cao == QUARTO) {
+                    //if ((AGInputManager.vrTouchEvents.getLastPosition().fX > AGScreenManager.iScreenWidth / 7.5f) && (AGInputManager.vrTouchEvents.getLastPosition().fY < AGScreenManager.iScreenHeight / 1.2f) &&
+                      //      (AGInputManager.vrTouchEvents.getLastPosition().fX < AGScreenManager.iScreenWidth / 1.2f) && (AGInputManager.vrTouchEvents.getLastPosition().fY > AGScreenManager.iScreenHeight / 5.7f)) {
 
+                        destino_x = AGInputManager.vrTouchEvents.getLastPosition().fX;
+                        destino_y = AGInputManager.vrTouchEvents.getLastPosition().fY;
+
+                        origem.setXY(cao.vrPosition.getX(), cao.vrPosition.getY());
+                        destino.setXY(AGInputManager.vrTouchEvents.getLastPosition().fX, AGInputManager.vrTouchEvents.getLastPosition().fY);
+
+                        hipo.setXY(destino.getX() - origem.getX(), destino.getY() - origem.getY());
+                        double an = Math.toDegrees(Math.atan2(hipo.getY(), hipo.getX()) - Math.PI / 2);
+
+                        cao.fAngle = (float) an;
+
+                        mostrar_botoes_interacao(0, false);
+
+                    //}
                 }
 
                 estado_cao = ANDANDO;
@@ -412,6 +461,29 @@ public class CenaGame extends AGScene {
 
         if (local_cao == SALA) {
 
+            if(hitbox_go_quarto.collide(sprite)){
+
+                local_cao = QUARTO;
+                cria_locais(local_cao);
+                removeSprite(cao);
+                cao = null;
+                ref_obj_interacao = 0;
+
+                if(dono != null) {
+                    removeSprite(dono);
+                    dono = null;
+                }
+
+                estado_cao = PARADO;
+
+                cria_locais(QUARTO);
+                cria_cao(AGScreenManager.iScreenWidth/1.25f, AGScreenManager.iScreenHeight/1.35f);
+                cao.fAngle = 90;
+
+                return;
+
+            }
+
             if(hitbox_tapete_sala.collide(sprite) && !tapete_sala_baguncou){
 
                 mostrar_botoes_interacao(TAPETE_SALA, true);
@@ -446,7 +518,84 @@ public class CenaGame extends AGScene {
             } else {
                 cao_is_safe = false;
             }
+
+        } else if(local_cao == QUARTO){
+
+            if(hitbox_go_sala.collide(sprite)){
+
+                local_cao = SALA;
+                cria_locais(local_cao);
+                removeSprite(cao);
+                cao = null;
+                ref_obj_interacao = 0;
+
+                if(dono != null) {
+                    removeSprite(dono);
+                    dono = null;
+                }
+
+                estado_cao = PARADO;
+
+                cria_locais(SALA);
+                cria_cao(AGScreenManager.iScreenWidth/2.9f, AGScreenManager.iScreenHeight/4.9f);
+                cao.fAngle = 270;
+
+                return;
+
+            }
+
+            if(planta_quarto.collide(sprite) && !planta_quarto_quebrou){
+
+                mostrar_botoes_interacao(VASO_QUARTO, true);
+
+            }
+
+            if(cama.collide(sprite) && !cama_quarto_baguncou){
+
+                mostrar_botoes_interacao(CAMA_QUARTO, true);
+
+            }
+
+            if (hitbox_guarda_r_p.collide(sprite) || hitbox_guarda_r_g.collide(sprite) || hitbox_guarda_r_m.collide(sprite) || cama.collide(sprite) || planta_quarto.collide(sprite)) {
+
+                if (sprite.vrPosition.getX() > destino_x) {
+                    sprite.vrPosition.setX(sprite.vrPosition.getX() + velocidade_cao_x * 2);
+                } else {
+                    sprite.vrPosition.setX(sprite.vrPosition.getX() - velocidade_cao_x * 2);
+                }
+
+                if (sprite.vrPosition.getY() > destino_y) {
+                    sprite.vrPosition.setY(sprite.vrPosition.getY() + velocidade_cao_y * 2);
+                } else {
+                    sprite.vrPosition.setY(sprite.vrPosition.getY() - velocidade_cao_y * 2);
+                }
+
+                estado_cao = PARADO;
+            }
+
+            if (hitbox_quarto_safe1.collide(sprite)) {
+                cao_is_safe = true;
+            } else {
+                cao_is_safe = false;
+            }
+
         }
+
+    }
+
+    private void reseta() {
+
+        cria_locais(local_cao);
+        removeSprite(cao);
+        cao = null;
+        ref_obj_interacao = 0;
+
+        if(dono != null) {
+            removeSprite(dono);
+            dono = null;
+        }
+
+        points = 0;
 
     }
 
@@ -540,11 +689,69 @@ public class CenaGame extends AGScene {
             tapete_sala_baguncado.vrPosition.setXY(AGScreenManager.iScreenWidth/4.45f, AGScreenManager.iScreenHeight/1.24f);
             tapete_sala_baguncado.setColor(1,1,1,0);
 
+            hitbox_go_quarto = createSprite(R.drawable.pixel, 1, 1);
+            hitbox_go_quarto.setScreenPercent(4, 15);
+            hitbox_go_quarto.vrPosition.setXY(AGScreenManager.iScreenWidth/4.2f, AGScreenManager.iScreenHeight/5.1f);
+            hitbox_go_quarto.setColor(0.5f, 1, 1, 1);
+
             planta_sala_quebrou = false;
             tapete_sala_baguncou = false;
             is_game_over = false;
             game_over_time = 0;
 
+
+        } else if( local == QUARTO){
+
+            chance_dono_aparece_quarto = 15;
+
+            remove_todos_oslocais();
+
+            quarto = createSprite(R.drawable.quarto, 1, 1);
+            quarto.setScreenPercent(100, 100);
+            quarto.vrPosition.setXY(AGScreenManager.iScreenWidth/2, AGScreenManager.iScreenHeight/2);
+
+            hitbox_guarda_r_g = createSprite(R.drawable.pixel, 1, 1);
+            hitbox_guarda_r_g.vrPosition.setXY(AGScreenManager.iScreenWidth/3f, AGScreenManager.iScreenHeight/1.35f);
+            hitbox_guarda_r_g.setScreenPercent(48, 8);
+            hitbox_guarda_r_g.setColor(1,1,1,0);
+
+            hitbox_guarda_r_m = createSprite(R.drawable.pixel, 1, 1);
+            hitbox_guarda_r_m.vrPosition.setXY(AGScreenManager.iScreenWidth/1.19f, AGScreenManager.iScreenHeight/1.8f);
+            hitbox_guarda_r_m.setScreenPercent(15, 21);
+            hitbox_guarda_r_m.setColor(1,1,1,0);
+
+            hitbox_guarda_r_p = createSprite(R.drawable.pixel, 1, 1);
+            hitbox_guarda_r_p.vrPosition.setXY(AGScreenManager.iScreenWidth/1.19f, AGScreenManager.iScreenHeight/3.8f);
+            hitbox_guarda_r_p.setScreenPercent(15, 10);
+            hitbox_guarda_r_p.setColor(1,1,1,0);
+
+            hitbox_quarto_safe1 = createSprite(R.drawable.pixel, 1,1 );
+            hitbox_quarto_safe1.vrPosition.setXY(AGScreenManager.iScreenWidth/1.19f, AGScreenManager.iScreenHeight/2.7f);
+            hitbox_quarto_safe1.setScreenPercent(15, 14);
+            hitbox_quarto_safe1.setColor(1,1,1,0);
+
+            cama = createSprite(R.drawable.cama, 1 ,1);
+            cama.vrPosition.setXY(AGScreenManager.iScreenWidth/3.8f, AGScreenManager.iScreenWidth/1.85f);
+            cama.setScreenPercent(42, 20);
+
+            cama_banguncada = createSprite(R.drawable.cama_baguncada, 1, 1);
+            cama_banguncada.vrPosition.setXY(AGScreenManager.iScreenWidth/3.8f, AGScreenManager.iScreenHeight/1.85f);
+            cama_banguncada.setScreenPercent(42, 20);
+            cama_banguncada.setColor(1,1,1,0);
+
+            planta_quarto = createSprite(R.drawable.vaso_planta, 1, 1);
+            planta_quarto.vrPosition.setXY(AGScreenManager.iScreenWidth/6.5f, AGScreenManager.iScreenHeight/2);
+            planta_quarto.setScreenPercent(11, 6);
+
+            planta_quarto_quebrada = createSprite(R.drawable.prantaquebrada, 1, 1);
+            planta_quarto_quebrada.vrPosition.setXY(AGScreenManager.iScreenWidth/6.5f, AGScreenManager.iScreenHeight/2);
+            planta_quarto_quebrada.setScreenPercent(11, 6);
+            planta_quarto_quebrada.setColor(1,1,1,0);
+
+            hitbox_go_sala = createSprite(R.drawable.pixel, 1, 1);
+            hitbox_go_sala.vrPosition.setXY(AGScreenManager.iScreenWidth/1.05f, AGScreenManager.iScreenHeight/1.35f);
+            hitbox_go_sala.setScreenPercent(4, 11);
+            hitbox_go_sala.setColor(0.5f, 1, 1, 1);
 
         }
 
@@ -566,6 +773,7 @@ public class CenaGame extends AGScene {
             removeSprite(planta_sala_quebrada);
             removeSprite(tapete_sala);
             removeSprite(tapete_sala_baguncado);
+            removeSprite(hitbox_go_quarto);
 
             sala = null;
             hitbox_sala_safe1 = null;
@@ -578,6 +786,33 @@ public class CenaGame extends AGScene {
             planta_sala_quebrada = null;
             tapete_sala = null;
             tapete_sala_baguncado = null;
+            hitbox_go_quarto = null;
+
+        }
+
+        if(quarto != null){
+
+            removeSprite(quarto);
+            removeSprite(hitbox_guarda_r_p);
+            removeSprite(hitbox_guarda_r_g);
+            removeSprite(hitbox_guarda_r_m);
+            removeSprite(planta_quarto);
+            removeSprite(planta_quarto_quebrada);
+            removeSprite(cama);
+            removeSprite(cama_banguncada);
+            removeSprite(hitbox_quarto_safe1);
+            removeSprite(hitbox_go_sala);
+
+            quarto = null;
+            hitbox_guarda_r_g = null;
+            hitbox_guarda_r_m = null;
+            hitbox_guarda_r_p = null;
+            planta_quarto = null;
+            planta_quarto_quebrada = null;
+            cama = null;
+            cama_banguncada = null;
+            hitbox_quarto_safe1 = null;
+            hitbox_go_sala = null;
 
         }
 
