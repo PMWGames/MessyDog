@@ -54,9 +54,9 @@ public class CenaGameOver extends AGScene {
 
         txt_points = new AGText(this, R.drawable.pixel);
         txt_points.setSize(6);
-        txt_points.setTextPosXY(20, AGScreenManager.iScreenHeight/1.1f);
-        txt_points.setTextColor(0,0,0,1);
-        txt_points.setText("Score: " + pontos);
+        txt_points.setTextPosXY(AGScreenManager.iScreenWidth/2 - 100, AGScreenManager.iScreenHeight/1.8F);
+        txt_points.setTextColor(1,0.1f,0.1f,1);
+        txt_points.setText(pontos);
     }
 
     @Override

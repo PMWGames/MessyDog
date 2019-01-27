@@ -61,9 +61,13 @@ public class CenaGame extends AGScene {
     private AGText txt_points = null;
 
     private int ronda = 0;
+    private int observa = 0;
+    private boolean is_game_over_now = false;
+    private int wait = 0;
     private int game_over_time = 0;
     private int chance_dono_aparece_sala, chance_dono_aparece_quarto;
     private boolean planta_quarto_quebrou;
+    private boolean restart = false;
 
 
     public CenaGame(AGGameManager pManager) {
@@ -72,6 +76,9 @@ public class CenaGame extends AGScene {
 
     @Override
     public void init() {
+
+        chance_dono_aparece_sala = 15;
+        chance_dono_aparece_quarto = 15;
 
         tam_x_dog = 5;
         tam_y_dog = 10;
@@ -116,6 +123,10 @@ public class CenaGame extends AGScene {
     @Override
     public void loop() {
 
+        if(is_game_over_now || (observa > 30 * 3)){
+            game_over_call();
+        }
+
         if(cao == null){
             cria_cao(AGScreenManager.iScreenWidth/2, AGScreenManager.iScreenHeight/4.2f);
         }
@@ -123,40 +134,63 @@ public class CenaGame extends AGScene {
 
 
         ronda ++;
-        if(ronda == 30 * 5){
-            ronda = 0;
+        if(ronda > 30 * 5){
 
             Random r = new Random();
             int rand = r.nextInt(100);
 
             if(local_cao == SALA) {
+
                 if (rand < chance_dono_aparece_sala){
+
+                    if(dono == null) {
+
+                        dono = createSprite(R.drawable.dono, 1, 1);
+                        dono.setScreenPercent(10, 10);
+                        dono.vrPosition.setXY(AGScreenManager.iScreenWidth / 6.2f, AGScreenManager.iScreenHeight/1.25f);
+                        dono.fAngle = 180;
+
+                    }
+
+
 
                     if( (planta_sala_quebrou || tapete_sala_baguncou) && (!cao_is_safe)){
 
-                        dono = createSprite(R.drawable.dono, 1, 1);
-                        dono.setScreenPercent(10, 10);
-                        dono.vrPosition.setXY(100, 100);
-
-                        game_over_call();
+                        is_game_over_now = true;
 
                     }
-
                 }
             }else if(local_cao == QUARTO){
+
+
+
                 if (rand < chance_dono_aparece_quarto){
-
-                    if( (cama_quarto_baguncou || planta_quarto_quebrou) && (!cao_is_safe)){
-
+                    if(dono == null) {
                         dono = createSprite(R.drawable.dono, 1, 1);
                         dono.setScreenPercent(10, 10);
-                        dono.vrPosition.setXY(100, 100);
+                        dono.vrPosition.setXY(AGScreenManager.iScreenWidth / 1.2f, AGScreenManager.iScreenHeight/1.35f);
+                        dono.fAngle = 90;
+                    }
+                    if( (cama_quarto_baguncou || planta_quarto_quebrou) && (!cao_is_safe)){
 
-                        game_over_call();
+                        is_game_over_now = true;
 
                     }
 
                 }
+            }
+
+            observa++;
+
+            if(observa > 30 * 3){
+                ronda = 0;
+                if(!is_game_over_now) {
+                    observa = 0;
+                }
+                removeSprite(dono);
+                dono = null;
+
+
             }
 
         }
@@ -392,67 +426,69 @@ public class CenaGame extends AGScene {
     private void movimenta_cao() {
 
 
-        //verifica se o estado do cão é o de andando ou parado
-        if(estado_cao == ANDANDO){
+        if(cao != null) {
+            //verifica se o estado do cão é o de andando ou parado
+            if (estado_cao == ANDANDO) {
 
-            if(cao != null) {
+                if (cao != null) {
 
-                checa_collide_hitbox(cao);
-
-            }
-
-            if(!chegou_destino_x) {
-                if (cao.vrPosition.getX() > destino_x) {
-
-                    cao.vrPosition.setX(cao.vrPosition.getX() - velocidade_cao_x);
-
-                    if (cao.vrPosition.getX() <= destino_x) {
-                        chegou_destino_x = true;
-                        if(chegou_destino_y){
-                            estado_cao = PARADO;
-                        }
-                    }
-
-                } else {
-
-                    cao.vrPosition.setX(cao.vrPosition.getX() + velocidade_cao_x);
-
-                    if (cao.vrPosition.getX() >= destino_x) {
-                        chegou_destino_x = true;
-                        if(chegou_destino_y){
-                            estado_cao = PARADO;
-                        }
-                    }
+                    checa_collide_hitbox(cao);
 
                 }
-            }
 
-            if(!chegou_destino_y) {
-                if (cao.vrPosition.getY() > destino_y) {
+                if (!chegou_destino_x) {
+                    if (cao.vrPosition.getX() > destino_x) {
 
-                    cao.vrPosition.setY(cao.vrPosition.getY() - velocidade_cao_y);
+                        cao.vrPosition.setX(cao.vrPosition.getX() - velocidade_cao_x);
 
-                    if (cao.vrPosition.getY() <= destino_y) {
-                        chegou_destino_y = true;
-                        if(chegou_destino_x){
-                            estado_cao = PARADO;
+                        if (cao.vrPosition.getX() <= destino_x) {
+                            chegou_destino_x = true;
+                            if (chegou_destino_y) {
+                                estado_cao = PARADO;
+                            }
                         }
-                    }
 
-                } else {
+                    } else {
 
-                    cao.vrPosition.setY(cao.vrPosition.getY() + velocidade_cao_y);
+                        cao.vrPosition.setX(cao.vrPosition.getX() + velocidade_cao_x);
 
-                    if (cao.vrPosition.getY() >= destino_y) {
-                        chegou_destino_y = true;
-                        if(chegou_destino_x){
-                            estado_cao = PARADO;
+                        if (cao.vrPosition.getX() >= destino_x) {
+                            chegou_destino_x = true;
+                            if (chegou_destino_y) {
+                                estado_cao = PARADO;
+                            }
                         }
-                    }
 
+                    }
                 }
-            }
 
+                if (!chegou_destino_y) {
+                    if (cao.vrPosition.getY() > destino_y) {
+
+                        cao.vrPosition.setY(cao.vrPosition.getY() - velocidade_cao_y);
+
+                        if (cao.vrPosition.getY() <= destino_y) {
+                            chegou_destino_y = true;
+                            if (chegou_destino_x) {
+                                estado_cao = PARADO;
+                            }
+                        }
+
+                    } else {
+
+                        cao.vrPosition.setY(cao.vrPosition.getY() + velocidade_cao_y);
+
+                        if (cao.vrPosition.getY() >= destino_y) {
+                            chegou_destino_y = true;
+                            if (chegou_destino_x) {
+                                estado_cao = PARADO;
+                            }
+                        }
+
+                    }
+                }
+
+            }
         }
 
 
@@ -462,141 +498,151 @@ public class CenaGame extends AGScene {
 
     private void checa_collide_hitbox(AGSprite sprite) {
 
-        if (local_cao == SALA) {
+        if(cao != null) {
+            if (local_cao == SALA) {
 
-            if(hitbox_go_quarto.collide(sprite)){
+                if (hitbox_go_quarto.collide(sprite)) {
 
-                local_cao = QUARTO;
-                cria_locais(local_cao);
-                removeSprite(cao);
-                cao = null;
-                ref_obj_interacao = 0;
+                    local_cao = QUARTO;
+                    cria_locais(local_cao);
+                    removeSprite(cao);
+                    cao = null;
+                    ref_obj_interacao = 0;
 
-                if(dono != null) {
-                    removeSprite(dono);
-                    dono = null;
+                    if (dono != null) {
+                        removeSprite(dono);
+                        dono = null;
+                    }
+
+                    estado_cao = PARADO;
+
+                    cria_locais(QUARTO);
+                    cria_cao(AGScreenManager.iScreenWidth / 1.25f, AGScreenManager.iScreenHeight / 1.35f);
+                    cao.fAngle = 90;
+
+                    return;
+
                 }
 
-                estado_cao = PARADO;
+                if (hitbox_tapete_sala.collide(sprite) && !tapete_sala_baguncou) {
 
-                cria_locais(QUARTO);
-                cria_cao(AGScreenManager.iScreenWidth/1.25f, AGScreenManager.iScreenHeight/1.35f);
-                cao.fAngle = 90;
+                    mostrar_botoes_interacao(TAPETE_SALA, true);
 
-                return;
+                }
 
-            }
+                if (hitbox_mesa_sala.collide(sprite) && !planta_sala_quebrou) {
 
-            if(hitbox_tapete_sala.collide(sprite) && !tapete_sala_baguncou){
+                    mostrar_botoes_interacao(VASO_SALA, true);
 
-                mostrar_botoes_interacao(TAPETE_SALA, true);
+                }
 
-            }
+                if (hitbox_sofa_p.collide(sprite) || hitbox_sofa_g.collide(sprite) || hitbox_mesa_sala.collide(sprite) || hitbox_coluna_sala.collide(sprite)) {
 
-            if(hitbox_mesa_sala.collide(sprite) && !planta_sala_quebrou){
+                    if (sprite.vrPosition.getX() > destino_x) {
+                        sprite.vrPosition.setX(sprite.vrPosition.getX() + velocidade_cao_x * 2);
+                    } else {
+                        sprite.vrPosition.setX(sprite.vrPosition.getX() - velocidade_cao_x * 2);
+                    }
 
-                mostrar_botoes_interacao(VASO_SALA, true);
+                    if (sprite.vrPosition.getY() > destino_y) {
+                        sprite.vrPosition.setY(sprite.vrPosition.getY() + velocidade_cao_y * 2);
+                    } else {
+                        sprite.vrPosition.setY(sprite.vrPosition.getY() - velocidade_cao_y * 2);
+                    }
 
-            }
+                    estado_cao = PARADO;
+                }
 
-            if (hitbox_sofa_p.collide(sprite) || hitbox_sofa_g.collide(sprite) || hitbox_mesa_sala.collide(sprite) || hitbox_coluna_sala.collide(sprite)) {
-
-                if (sprite.vrPosition.getX() > destino_x) {
-                    sprite.vrPosition.setX(sprite.vrPosition.getX() + velocidade_cao_x * 2);
+                if (hitbox_sala_safe1.collide(sprite)) {
+                    cao_is_safe = true;
                 } else {
-                    sprite.vrPosition.setX(sprite.vrPosition.getX() - velocidade_cao_x * 2);
+                    cao_is_safe = false;
                 }
 
-                if (sprite.vrPosition.getY() > destino_y) {
-                    sprite.vrPosition.setY(sprite.vrPosition.getY() + velocidade_cao_y * 2);
+            } else if (local_cao == QUARTO) {
+
+                if (hitbox_go_sala.collide(sprite)) {
+
+                    local_cao = SALA;
+                    cria_locais(local_cao);
+                    removeSprite(cao);
+                    cao = null;
+                    ref_obj_interacao = 0;
+
+                    if (dono != null) {
+                        removeSprite(dono);
+                        dono = null;
+                    }
+
+                    estado_cao = PARADO;
+
+                    cria_locais(SALA);
+                    cria_cao(AGScreenManager.iScreenWidth / 2.9f, AGScreenManager.iScreenHeight / 4.9f);
+                    // cria_cao(AGScreenManager.iScreenWidth/1.25f, AGScreenManager.iScreenHeight/1.35f);
+                    cao.fAngle = 270;
+
+                    return;
+
+                }
+
+                if (planta_quarto.collide(sprite) && !planta_quarto_quebrou) {
+
+                    mostrar_botoes_interacao(VASO_QUARTO, true);
+
+                }
+
+                if (cama.collide(sprite) && !cama_quarto_baguncou) {
+
+                    mostrar_botoes_interacao(CAMA_QUARTO, true);
+
+                }
+
+                if (hitbox_guarda_r_p.collide(sprite) || hitbox_guarda_r_g.collide(sprite) || hitbox_guarda_r_m.collide(sprite) || cama.collide(sprite) || planta_quarto.collide(sprite)) {
+
+                    if (sprite.vrPosition.getX() > destino_x) {
+                        sprite.vrPosition.setX(sprite.vrPosition.getX() + velocidade_cao_x * 2);
+                    } else {
+                        sprite.vrPosition.setX(sprite.vrPosition.getX() - velocidade_cao_x * 2);
+                    }
+
+                    if (sprite.vrPosition.getY() > destino_y) {
+                        sprite.vrPosition.setY(sprite.vrPosition.getY() + velocidade_cao_y * 2);
+                    } else {
+                        sprite.vrPosition.setY(sprite.vrPosition.getY() - velocidade_cao_y * 2);
+                    }
+
+                    estado_cao = PARADO;
+                }
+
+                if (hitbox_quarto_safe1.collide(sprite)) {
+                    cao_is_safe = true;
                 } else {
-                    sprite.vrPosition.setY(sprite.vrPosition.getY() - velocidade_cao_y * 2);
+                    cao_is_safe = false;
                 }
 
-                estado_cao = PARADO;
             }
-
-            if (hitbox_sala_safe1.collide(sprite)) {
-                cao_is_safe = true;
-            } else {
-                cao_is_safe = false;
-            }
-
-        } else if(local_cao == QUARTO){
-
-            if(hitbox_go_sala.collide(sprite)){
-
-                local_cao = SALA;
-                cria_locais(local_cao);
-                removeSprite(cao);
-                cao = null;
-                ref_obj_interacao = 0;
-
-                if(dono != null) {
-                    removeSprite(dono);
-                    dono = null;
-                }
-
-                estado_cao = PARADO;
-
-                cria_locais(SALA);
-                cria_cao(AGScreenManager.iScreenWidth/2.9f, AGScreenManager.iScreenHeight/4.9f);
-                cao.fAngle = 270;
-
-                return;
-
-            }
-
-            if(planta_quarto.collide(sprite) && !planta_quarto_quebrou){
-
-                mostrar_botoes_interacao(VASO_QUARTO, true);
-
-            }
-
-            if(cama.collide(sprite) && !cama_quarto_baguncou){
-
-                mostrar_botoes_interacao(CAMA_QUARTO, true);
-
-            }
-
-            if (hitbox_guarda_r_p.collide(sprite) || hitbox_guarda_r_g.collide(sprite) || hitbox_guarda_r_m.collide(sprite) || cama.collide(sprite) || planta_quarto.collide(sprite)) {
-
-                if (sprite.vrPosition.getX() > destino_x) {
-                    sprite.vrPosition.setX(sprite.vrPosition.getX() + velocidade_cao_x * 2);
-                } else {
-                    sprite.vrPosition.setX(sprite.vrPosition.getX() - velocidade_cao_x * 2);
-                }
-
-                if (sprite.vrPosition.getY() > destino_y) {
-                    sprite.vrPosition.setY(sprite.vrPosition.getY() + velocidade_cao_y * 2);
-                } else {
-                    sprite.vrPosition.setY(sprite.vrPosition.getY() - velocidade_cao_y * 2);
-                }
-
-                estado_cao = PARADO;
-            }
-
-            if (hitbox_quarto_safe1.collide(sprite)) {
-                cao_is_safe = true;
-            } else {
-                cao_is_safe = false;
-            }
-
         }
 
     }
 
     private void reseta() {
 
-        cria_locais(local_cao);
         removeSprite(cao);
         cao = null;
+
+        cria_locais(local_cao);
         ref_obj_interacao = 0;
 
         if(dono != null) {
             removeSprite(dono);
             dono = null;
         }
+
+        chance_dono_aparece_sala = 15;
+        chance_dono_aparece_quarto = 15;
+        is_game_over_now = false;
+        observa = 0;
+        restart = true;
 
         points = 0;
 
@@ -633,8 +679,6 @@ public class CenaGame extends AGScene {
     private void cria_locais(int local) {
 
         if (local == SALA){
-
-            chance_dono_aparece_sala = 15;
 
             remove_todos_oslocais();
 
@@ -705,8 +749,6 @@ public class CenaGame extends AGScene {
 
         } else if( local == QUARTO){
 
-            chance_dono_aparece_quarto = 15;
-
             remove_todos_oslocais();
 
             quarto = createSprite(R.drawable.quarto, 1, 1);
@@ -736,9 +778,10 @@ public class CenaGame extends AGScene {
             cama = createSprite(R.drawable.cama, 1 ,1);
             cama.vrPosition.setXY(AGScreenManager.iScreenWidth/3.8f, AGScreenManager.iScreenWidth/1.85f);
             cama.setScreenPercent(42, 20);
+            //cama.setColor(1,1,1,0);
 
             cama_banguncada = createSprite(R.drawable.cama_baguncada, 1, 1);
-            cama_banguncada.vrPosition.setXY(AGScreenManager.iScreenWidth/3.8f, AGScreenManager.iScreenHeight/1.85f);
+            cama_banguncada.vrPosition.setXY(AGScreenManager.iScreenWidth/3.8f, AGScreenManager.iScreenHeight/(3.25f));
             cama_banguncada.setScreenPercent(42, 20);
             cama_banguncada.setColor(1,1,1,0);
 
@@ -756,6 +799,15 @@ public class CenaGame extends AGScene {
             hitbox_go_sala.setScreenPercent(4, 11);
             hitbox_go_sala.setColor(0.5f, 1, 1, 1);
 
+        }
+
+        if(restart){
+            restart = false;
+            if(local == QUARTO) {
+                cria_cao(AGScreenManager.iScreenWidth / 2.9f, AGScreenManager.iScreenHeight / 4.9f);
+            } else if(local == SALA){
+                cria_cao(AGScreenManager.iScreenWidth/1.25f, AGScreenManager.iScreenHeight/1.35f);
+            }
         }
 
     }
