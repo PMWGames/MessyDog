@@ -4,10 +4,12 @@ import com.elementalspin.pmwgames.messydog.AndGraph.AGGameManager;
 import com.elementalspin.pmwgames.messydog.AndGraph.AGInputManager;
 import com.elementalspin.pmwgames.messydog.AndGraph.AGScene;
 import com.elementalspin.pmwgames.messydog.AndGraph.AGScreenManager;
+import com.elementalspin.pmwgames.messydog.AndGraph.AGSoundManager;
 import com.elementalspin.pmwgames.messydog.AndGraph.AGSprite;
 
 public class CenaMenu extends AGScene {
 
+    private AGSprite bg = null;
     private AGSprite btn_start = null;
 
     public CenaMenu(AGGameManager pManager) {
@@ -17,9 +19,16 @@ public class CenaMenu extends AGScene {
     @Override
     public void init() {
 
-        btn_start = createSprite(R.drawable.moana2, 1, 1);
+        //AGSoundManager.vrMusic.loadMusic("play.mp3", true);
+        //AGSoundManager.vrMusic.play();
+
+        bg = createSprite(R.drawable.tela_inicial, 1, 1);
+        bg.setScreenPercent(100, 100);
+        bg.vrPosition.setXY(AGScreenManager.iScreenWidth/2, AGScreenManager.iScreenHeight/2);
+
+        btn_start = createSprite(R.drawable.plau_button, 1, 1);
         btn_start.setScreenPercent(30, 10);
-        btn_start.vrPosition.setXY(AGScreenManager.iScreenWidth /2, AGScreenManager.iScreenHeight/2);
+        btn_start.vrPosition.setXY(AGScreenManager.iScreenWidth/2, AGScreenManager.iScreenHeight/8.5f);
 
     }
 
