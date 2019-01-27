@@ -10,6 +10,7 @@ public class MainActivity extends AGActivityGame {
 
     private CenaMenu cena_menu = null;
     private CenaGame cena_game = null;
+    private CenaGameOver cena_gameover = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,6 +29,7 @@ public class MainActivity extends AGActivityGame {
         //método responsável por instanciar as cenas
         this.cena_menu = new CenaMenu(this.getGameManager());
         this.cena_game = new CenaGame(this.getGameManager());
+        this.cena_gameover = new CenaGameOver(this.getGameManager());
 
     }
 
@@ -35,6 +37,7 @@ public class MainActivity extends AGActivityGame {
         //método responsável por adicionar as cenas na lista de cenas
         this.getGameManager().addScene(this.cena_menu);
         this.getGameManager().addScene(this.cena_game);
+        this.getGameManager().addScene(this.cena_gameover);
 
     }
 }
