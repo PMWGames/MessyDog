@@ -27,7 +27,7 @@ public class CenaGame extends AGScene {
     private static int PARADO = 0, ANDANDO = 1;
     private int estado_cao = PARADO;
 
-    private static int TAPETE_SALA = 1, VASO_SALA = 2, VASO_QUARTO, CAMA_QUARTO;
+    private static int TAPETE_SALA = 1, VASO_SALA = 2, VASO_QUARTO = 3, CAMA_QUARTO = 4;
     private int ref_obj_interacao = 0;
     private boolean planta_sala_quebrou = false, isPlanta_quarto_quebrou = false;
     private boolean tapete_sala_baguncou = false, cama_quarto_baguncou = false;
@@ -137,7 +137,7 @@ public class CenaGame extends AGScene {
                         dono = createSprite(R.drawable.dono, 1, 1);
                         dono.setScreenPercent(10, 10);
                         dono.vrPosition.setXY(100, 100);
-                        
+
                         game_over_call();
 
                     }
@@ -220,7 +220,8 @@ public class CenaGame extends AGScene {
                 chance_dono_aparece_sala += 5;
 
 
-            } else if(ref_obj_interacao == VASO_SALA && !planta_sala_quebrou){
+            }
+            if(ref_obj_interacao == VASO_SALA && !planta_sala_quebrou){
 
                 planta_sala.setColor(1,1,1,0);
                 planta_sala_quebrada.setColor(1,1,1,1);
@@ -231,7 +232,8 @@ public class CenaGame extends AGScene {
                 int vidro_quebra = AGSoundManager.vrSoundEffects.loadSoundEffect("vidro.mp3");
                 AGSoundManager.vrSoundEffects.play(vidro_quebra);
 
-            } else if(ref_obj_interacao == VASO_QUARTO && !planta_quarto_quebrou){
+            }
+            if(ref_obj_interacao == VASO_QUARTO && !planta_quarto_quebrou){
 
                 planta_quarto.setColor(1,1,1,0);
                 planta_quarto_quebrada.setColor(1,1,1,1);
@@ -242,7 +244,8 @@ public class CenaGame extends AGScene {
                 int vidro_quebra = AGSoundManager.vrSoundEffects.loadSoundEffect("vidro.mp3");
                 AGSoundManager.vrSoundEffects.play(vidro_quebra);
 
-            } else if (ref_obj_interacao == CAMA_QUARTO && !cama_quarto_baguncou){
+            }
+            if (ref_obj_interacao == CAMA_QUARTO && !cama_quarto_baguncou){
                 cama.setColor(1,1,1,0);
                 cama_banguncada.setColor(1,1,1,1);
                 cama_quarto_baguncou = true;

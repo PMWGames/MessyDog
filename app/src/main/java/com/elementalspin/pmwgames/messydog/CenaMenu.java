@@ -11,6 +11,7 @@ public class CenaMenu extends AGScene {
 
     private AGSprite bg = null;
     private AGSprite btn_start = null;
+    private AGSprite dog_animation = null;
 
     public CenaMenu(AGGameManager pManager) {
         super(pManager);
@@ -26,9 +27,14 @@ public class CenaMenu extends AGScene {
         bg.setScreenPercent(100, 100);
         bg.vrPosition.setXY(AGScreenManager.iScreenWidth/2, AGScreenManager.iScreenHeight/2);
 
+        dog_animation = createSprite(R.drawable.dog_animation, 5, 1);
+        dog_animation.setScreenPercent(70, 40);
+        dog_animation.vrPosition.setXY(AGScreenManager.iScreenWidth/3, AGScreenManager.iScreenHeight/4.5f);
+        dog_animation.addAnimation(4, true, 0, 4);
+
         btn_start = createSprite(R.drawable.plau_button, 1, 1);
         btn_start.setScreenPercent(30, 10);
-        btn_start.vrPosition.setXY(AGScreenManager.iScreenWidth/2, AGScreenManager.iScreenHeight/8.5f);
+        btn_start.vrPosition.setXY(AGScreenManager.iScreenWidth/1.2f, AGScreenManager.iScreenHeight/8.5f);
 
     }
 
