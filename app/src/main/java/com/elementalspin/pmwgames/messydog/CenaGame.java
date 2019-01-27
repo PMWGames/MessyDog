@@ -4,12 +4,16 @@ import android.util.Log;
 
 import com.elementalspin.pmwgames.messydog.AndGraph.AGGameManager;
 import com.elementalspin.pmwgames.messydog.AndGraph.AGInputManager;
+import com.elementalspin.pmwgames.messydog.AndGraph.AGMusic;
 import com.elementalspin.pmwgames.messydog.AndGraph.AGScene;
 import com.elementalspin.pmwgames.messydog.AndGraph.AGScreenManager;
+import com.elementalspin.pmwgames.messydog.AndGraph.AGSoundManager;
 import com.elementalspin.pmwgames.messydog.AndGraph.AGSprite;
 import com.elementalspin.pmwgames.messydog.AndGraph.AGText;
 import com.elementalspin.pmwgames.messydog.AndGraph.AGVector2D;
-import com.elementalspin.pmwgames.messydog.java2d.Vector2D;
+
+import java.util.Random;
+
 
 public class CenaGame extends AGScene {
 
@@ -22,6 +26,7 @@ public class CenaGame extends AGScene {
     private static int TAPETE_SALA = 1, VASO_SALA = 2;
     private int ref_obj_interacao = 0;
     private boolean planta_sala_quebrou = false;
+    private boolean tapete_sala_baguncou = false;
 
     private float destino_x, destino_y, distancia_x, distancia_y;;
     private boolean chegou_destino_x, chegou_destino_y;
@@ -36,14 +41,20 @@ public class CenaGame extends AGScene {
     private AGSprite sala = null;
 
     private AGSprite cao = null;
+    private AGSprite dono = null;
 
     private AGSprite hitbox_sofa_p = null, hitbox_sofa_g = null, hitbox_mesa_sala = null, hitbox_tapete_sala = null,
-            hitbox_sala_safe1 = null, hitbox_coluna_sala = null, planta_sala = null, planta_sala_quebrada = null;
+            hitbox_sala_safe1 = null, hitbox_coluna_sala = null, planta_sala = null, planta_sala_quebrada = null,
+            tapete_sala = null, tapete_sala_baguncado = null;
 
     private AGSprite botao_aceitar = null;
     private AGSprite botao_cancelar = null;
 
     private AGText txt_points = null;
+
+    private int ronda = 0;
+    private int chance_dono_aparece_sala;
+
 
 
     public CenaGame(AGGameManager pManager) {
@@ -55,6 +66,10 @@ public class CenaGame extends AGScene {
 
         tam_x_dog = 5;
         tam_y_dog = 10;
+
+        AGSoundManager.vrMusic.loadMusic("trilha.mp3", true);
+        AGSoundManager.vrMusic.setVolume(80, 80);
+        AGSoundManager.vrMusic.play();
 
         //gerencia os locais que o cao está e suas interações
         cria_locais(SALA);
@@ -92,6 +107,32 @@ public class CenaGame extends AGScene {
     @Override
     public void loop() {
 
+        ronda ++;
+        if(ronda == 30 * 5){
+            ronda = 0;
+
+            Random r = new Random();
+            int rand = r.nextInt(100);
+
+            if(local_cao == SALA) {
+                if (rand < chance_dono_aparece_sala){
+
+                    if( (planta_sala_quebrou || tapete_sala_baguncou) && (!cao_is_safe)){
+
+                        dono = createSprite(R.drawable.dono, 1, 1);
+                        dono.setScreenPercent(10, 10);
+                        dono.vrPosition.setXY(100, 100);
+
+                        int cachorro = AGSoundManager.vrSoundEffects.loadSoundEffect("cachorro.mp3");
+                        AGSoundManager.vrSoundEffects.play(cachorro);
+
+                    }
+
+                }
+            }
+
+        }
+
         if(cao == null){
             cria_cao(AGScreenManager.iScreenWidth/2, AGScreenManager.iScreenHeight/4.2f);
         }
@@ -104,6 +145,10 @@ public class CenaGame extends AGScene {
         verifica_botoes_interacao();
 
         update_points();
+
+        if(AGInputManager.vrTouchEvents.bBackButtonClicked){
+            vrGameManager.vrActivity.finish();
+        }
 
     }
 
@@ -119,7 +164,15 @@ public class CenaGame extends AGScene {
 
         if(ref_obj_interacao != 0){
 
-            if(ref_obj_interacao == TAPETE_SALA){
+            if(ref_obj_interacao == TAPETE_SALA && !tapete_sala_baguncou){
+
+                tapete_sala.setColor(1,0.2f,0.2f,0);
+                tapete_sala_baguncado.setColor(1,1,1,1);
+                tapete_sala_baguncou = true;
+                ref_obj_interacao = 0;
+                points += 30;
+                chance_dono_aparece_sala += 5;
+
 
             } else if(ref_obj_interacao == VASO_SALA && !planta_sala_quebrou){
 
@@ -128,6 +181,9 @@ public class CenaGame extends AGScene {
                 planta_sala_quebrou = true;
                 ref_obj_interacao = 0;
                 points += 200;
+                chance_dono_aparece_sala += 10;
+                int vidro_quebra = AGSoundManager.vrSoundEffects.loadSoundEffect("vidro.mp3");
+                AGSoundManager.vrSoundEffects.play(vidro_quebra);
 
             }
 
@@ -141,7 +197,7 @@ public class CenaGame extends AGScene {
             if(botao_aceitar.collide(AGInputManager.vrTouchEvents.getLastPosition())){
 
                 if(ref_obj_interacao == TAPETE_SALA){
-
+                    interage();
                 }
 
                 if(ref_obj_interacao == VASO_SALA){
@@ -312,7 +368,7 @@ public class CenaGame extends AGScene {
 
         if (local_cao == SALA) {
 
-            if(hitbox_tapete_sala.collide(sprite)){
+            if(hitbox_tapete_sala.collide(sprite) && !tapete_sala_baguncou){
 
                 mostrar_botoes_interacao(TAPETE_SALA, true);
 
@@ -382,6 +438,8 @@ public class CenaGame extends AGScene {
 
         if (local == SALA){
 
+            chance_dono_aparece_sala = 15;
+
             remove_todos_oslocais();
 
             sala = createSprite(R.drawable.sala, 1,1);
@@ -419,16 +477,27 @@ public class CenaGame extends AGScene {
             hitbox_coluna_sala.setColor(1,1,1,0);
 
             planta_sala = createSprite(R.drawable.vaso_planta, 1, 1);
-            planta_sala.setScreenProportional(AGScreenManager.iScreenWidth / 8);
+            planta_sala.setScreenPercent(12, 8);
             planta_sala.vrPosition.setXY(AGScreenManager.iScreenWidth/2.09f, AGScreenManager.iScreenHeight/2.09f);
             planta_sala.setColor(1,1,1,1);
 
             planta_sala_quebrada = createSprite(R.drawable.prantaquebrada,1 ,1);
-            planta_sala_quebrada.setScreenProportional(AGScreenManager.iScreenWidth / 8);
+            planta_sala_quebrada.setScreenPercent(15,10);
             planta_sala_quebrada.vrPosition.setXY(AGScreenManager.iScreenWidth/2.09f, AGScreenManager.iScreenHeight/2.09f);
             planta_sala_quebrada.setColor(1,1,1,0);
 
+            tapete_sala = createSprite(R.drawable.pixel, 1, 1);
+            tapete_sala.setScreenPercent(21, 8);
+            tapete_sala.vrPosition.setXY(AGScreenManager.iScreenWidth/4.45f, AGScreenManager.iScreenHeight/1.24f);
+            tapete_sala.setColor(1,0.2f,0.2f,1);
+
+            tapete_sala_baguncado = createSprite(R.drawable.pixel, 1, 1);
+            tapete_sala_baguncado.setScreenPercent(21, 8);
+            tapete_sala_baguncado.vrPosition.setXY(AGScreenManager.iScreenWidth/4.45f, AGScreenManager.iScreenHeight/1.24f);
+            tapete_sala_baguncado.setColor(1,1,1,0);
+
             planta_sala_quebrou = false;
+            tapete_sala_baguncou = false;
 
 
         }
